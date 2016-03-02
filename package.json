@@ -1,6 +1,6 @@
 {
   "name": "crusca-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Node.js command line client for crusca, the ES6 compatible gettext alternative to extract translation strings",
   "scripts": {
     "compile": "babel src --out-dir lib/",
