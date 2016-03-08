@@ -16,7 +16,7 @@ const verbose = argv.verbose;
 
 // Default should go in a separate place
 const DEFAULT_CONFIG = './.cruscarc';
-const DEFAULT_EXTENSIONS = ['js'];
+const DEFAULT_EXTENSIONS = ['.js'];
 const DEFAULT_IGNORE = [];
 
 const isFile = fs.lstatSync(filePath).isFile();
@@ -59,9 +59,8 @@ if (isFile) {
 
   const ignoreArr = config.ignore || DEFAULT_IGNORE;
   const extensions = config.extensions || DEFAULT_EXTENSIONS;
-  const whitelistExts = extensions.map(el => `.${el}`);
   const whitelistFunc = (file, stats) => {
-    return stats.isFile() ? whitelistExts.indexOf(path.extname(file)) === -1 : false;
+    return stats.isFile() ? extensions.indexOf(path.extname(file)) === -1 : false;
   };
 
   const ignoreArguments = ignoreArr.length > 0 ? ignoreArr.concat(whitelistFunc) : [whitelistFunc];
