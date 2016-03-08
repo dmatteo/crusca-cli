@@ -10,19 +10,31 @@ const writeFile = Promise.promisify(fs.writeFile);
 
 const argv = require('./cli-interface').argv();
 
-const filePath = argv.in;
-const outFile = argv.out;
-const verbose = argv.verbose;
-
 // Default should go in a separate place
 const DEFAULT_CONFIG = './.cruscarc';
 const DEFAULT_EXTENSIONS = ['.js'];
 const DEFAULT_IGNORE = [];
+const DEFAULT_VERBOSE = false;
+
+const filePath = argv.in;
+const outFile = argv.out;
+
+// Establishing optional parameters
+const opts = {
+  config: argv.config || DEFAULT_CONFIG,
+  extensions: argv.e
+    ? Array.isArray(argv.e) ? argv.e : [argv.e]
+    : DEFAULT_EXTENSIONS,
+  ignore: argv.g
+    ? Array.isArray(argv.g) ? argv.g : [argv.g]
+    : DEFAULT_IGNORE,
+  verbose: argv.v || DEFAULT_VERBOSE
+};
 
 const isFile = fs.lstatSync(filePath).isFile();
 
 const getConfig = () => {
-  const configFile = argv.config || DEFAULT_CONFIG;
+  const configFile = opts.config;
 
   try {
     fs.lstatSync(configFile);
@@ -34,6 +46,13 @@ const getConfig = () => {
     fs.readFileSync(configFile, 'utf8')
   );
 };
+
+const ensureLeadingDot = (extArray) => {
+  return extArray.map((ext) => {
+    console.log(ext);
+    return ext.charAt(0) === '.' ? ext : `.${ext}`
+  })
+}
 
 const processFile = (data, filePath, pKeys) => {
   const keys = crusca.extract(data);
@@ -57,10 +76,11 @@ if (isFile) {
 
   const config = getConfig();
 
-  const ignoreArr = config.ignore || DEFAULT_IGNORE;
-  const extensions = config.extensions || DEFAULT_EXTENSIONS;
+  const ignoreArr = config.ignore || opts.ignore;
+  const extensions = config.extensions || opts.extensions;
+  const whitelistExts = ensureLeadingDot(extensions);
   const whitelistFunc = (file, stats) => {
-    return stats.isFile() ? extensions.indexOf(path.extname(file)) === -1 : false;
+    return stats.isFile() ? whitelistExts.indexOf(path.extname(file)) === -1 : false;
   };
 
   const ignoreArguments = ignoreArr.length > 0 ? ignoreArr.concat(whitelistFunc) : [whitelistFunc];
@@ -70,7 +90,7 @@ if (isFile) {
 
     Promise.all(fileContentArray).then((data) => {
       const taggedKeys = data.reduce((keys, data, idx) => {
-        if (verbose) console.log(files[idx]);
+        if (opts.verbose) console.log(files[idx]);
         return processFile(data, files[idx], keys)
       }, {});
 

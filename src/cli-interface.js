@@ -23,10 +23,10 @@ module.exports = {
       .describe('o', 'Output file that will contain the extracted strings')
 
       .alias('e', 'ext')
-      .describe('e', 'Whitelist file extensions you want to parse (default .js)\nNOT SUPPORTED YET, use .cruscarc')
+      .describe('e', 'Whitelist file extensions you want to parse  (multiple entries allowed, default ".js")')
 
       .alias('g', 'ignore')
-      .describe('g', 'Blacklist file or directories you don\'t want to scan\nNOT SUPPORTED YET, use .cruscarc')
+      .describe('g', 'Blacklist file or directories you don\'t want to scan (multiple entries allowed)')
 
       .alias('c', 'config')
       .describe('c', 'Custom config path (default ./cruscarc)')
