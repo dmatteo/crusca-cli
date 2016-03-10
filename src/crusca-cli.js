@@ -4,7 +4,7 @@ const crusca = require('crusca');
 const Promise = require('bluebird');
 const fs = require('graceful-fs');
 const path = require('path');
-const recursive = require('recursive-readdir');
+const recursive = Promise.promisify(require('recursive-readdir'));
 const readFile = Promise.promisify(fs.readFile);
 const writeFile = Promise.promisify(fs.writeFile);
 
@@ -59,11 +59,11 @@ export default (argv) => {
 
   if (isFile) {
 
-    readFile(filePath, 'utf8').then((data) => {
+    return readFile(filePath, 'utf8').then((data) => {
       const taggedKeys = processFile(data, filePath);
       const keysCount = Object.keys(taggedKeys).length;
 
-      writeFile(outFile, crusca.generatePot(taggedKeys)).then(() => {
+      return writeFile(outFile, crusca.generatePot(taggedKeys)).then(() => {
         console.log(`${keysCount} strings extracted from ${filePath}`);
         process.exit(0);
       }, (err) => {
@@ -82,11 +82,11 @@ export default (argv) => {
     };
 
     const ignoreArguments = ignoreArr.length > 0 ? ignoreArr.concat(whitelistFunc) : [whitelistFunc];
-    recursive(filePath, ignoreArguments, (err, files) => {
+    return recursive(filePath, ignoreArguments).then((files) => {
       const fileContentArray = files.map((file) => readFile(file, 'utf8'));
       const filesCount = fileContentArray.length;
 
-      Promise.all(fileContentArray).then((data) => {
+      return Promise.all(fileContentArray).then((data) => {
         const taggedKeys = data.reduce((keys, data, idx) => {
           if (opts.verbose) console.log(files[idx]);
           return processFile(data, files[idx], keys)
@@ -95,7 +95,7 @@ export default (argv) => {
         const keysCount = Object.keys(taggedKeys).length;
         const potFileContent = crusca.generatePot(taggedKeys);
 
-        writeFile(outFile, potFileContent).then(() => {
+        return writeFile(outFile, potFileContent).then(() => {
           console.log(`${keysCount} strings extracted from ${filesCount} files.`);
           process.exit(0);
         }, (err) => {
