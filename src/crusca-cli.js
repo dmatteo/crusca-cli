@@ -13,6 +13,7 @@ const DEFAULT_CONFIG = './.cruscarc';
 const DEFAULT_EXTENSIONS = ['.js'];
 const DEFAULT_IGNORE = [];
 const DEFAULT_VERBOSE = false;
+const DEFAULT_QUIET = false;
 
 const getConfig = (opts) => {
   const configFile = opts.config;
@@ -52,7 +53,8 @@ export default (argv) => {
     ignore: argv.g
       ? Array.isArray(argv.g) ? argv.g : [argv.g]
       : DEFAULT_IGNORE,
-    verbose: argv.v || DEFAULT_VERBOSE
+    verbose: argv.v || DEFAULT_VERBOSE,
+    quiet: argv.q || DEFAULT_QUIET
   };
 
   const isFile = fs.lstatSync(filePath).isFile();
@@ -64,8 +66,11 @@ export default (argv) => {
       const keysCount = Object.keys(taggedKeys).length;
 
       return writeFile(outFile, crusca.generatePot(taggedKeys)).then(() => {
-        console.log(`${keysCount} strings extracted from ${filePath}`);
-        process.exit(0);
+        if (!opts.quiet) console.log(`${keysCount} strings extracted from ${filePath}`);
+        return {
+          files: 1,
+          strings: keysCount
+        }
       }, (err) => {
         throw new Error(err);
       });
@@ -96,8 +101,11 @@ export default (argv) => {
         const potFileContent = crusca.generatePot(taggedKeys);
 
         return writeFile(outFile, potFileContent).then(() => {
-          console.log(`${keysCount} strings extracted from ${filesCount} files.`);
-          process.exit(0);
+          if (!opts.quiet) console.log(`${keysCount} strings extracted from ${filesCount} files.`);
+          return {
+            files: filesCount,
+            strings: keysCount
+          }
         }, (err) => {
           throw new Error(err);
         });

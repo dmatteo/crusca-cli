@@ -34,6 +34,9 @@ module.exports = {
       .alias('v', 'verbose')
       .describe('v', 'Enable chatty version')
 
+      .alias('q', 'quiet')
+      .describe('q', 'Completely silent on success')
+
       .help('h')
       .alias('h', 'help')
 
