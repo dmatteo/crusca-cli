@@ -29,6 +29,12 @@ const getConfig = (opts) => {
   );
 };
 
+const ensureArray = (data) => {
+  return Array.isArray(data)
+    ? data
+    : [data]
+};
+
 const ensureLeadingDot = (extArray) => {
   return extArray.map((ext) => {
     return ext.charAt(0) === '.' ? ext : `.${ext}`
@@ -46,12 +52,12 @@ export default (argv) => {
 
   // Establishing optional parameters
   const opts = {
-    config: argv.config || DEFAULT_CONFIG,
-    extensions: argv.e
-      ? Array.isArray(argv.e) ? argv.e : [argv.e]
+    config: argv.c || DEFAULT_CONFIG,
+    ext: argv.e
+      ? ensureArray(argv.e)
       : DEFAULT_EXTENSIONS,
     ignore: argv.g
-      ? Array.isArray(argv.g) ? argv.g : [argv.g]
+      ? ensureArray(argv.g)
       : DEFAULT_IGNORE,
     verbose: argv.v || DEFAULT_VERBOSE,
     quiet: argv.q || DEFAULT_QUIET
@@ -79,8 +85,14 @@ export default (argv) => {
 
     const config = getConfig(opts);
 
-    const ignoreArr = config.ignore || opts.ignore;
-    const extensions = config.extensions || opts.extensions;
+    const ignoreArr = config.ignore
+      ? ensureArray(config.ignore)
+      : opts.ignore
+
+    const extensions = config.ext
+      ? ensureArray(config.ext)
+      : opts.ext
+
     const whitelistExts = ensureLeadingDot(extensions);
     const whitelistFunc = (file, stats) => {
       return stats.isFile() ? whitelistExts.indexOf(path.extname(file)) === -1 : false;
