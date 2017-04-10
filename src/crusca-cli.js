@@ -100,7 +100,7 @@ export default (argv) => {
 
     const ignoreArguments = ignoreArr.length > 0 ? ignoreArr.concat(whitelistFunc) : [whitelistFunc];
     return recursive(filePath, ignoreArguments).then((files) => {
-      const fileContentArray = files.map((file) => readFile(file, 'utf8'));
+      const fileContentArray = files.sort().map((file) => readFile(file, 'utf8'));
       const filesCount = fileContentArray.length;
 
       return Promise.all(fileContentArray).then((data) => {
