@@ -15,6 +15,8 @@ const DEFAULT_IGNORE = [];
 const DEFAULT_VERBOSE = false;
 const DEFAULT_QUIET = false;
 
+const isWindows = process.platform === 'win32';
+
 const getConfig = (opts) => {
   const configFile = opts.config;
 
@@ -100,7 +102,8 @@ export default (argv) => {
 
     const ignoreArguments = ignoreArr.length > 0 ? ignoreArr.concat(whitelistFunc) : [whitelistFunc];
     return recursive(filePath, ignoreArguments).then((files) => {
-      const fileContentArray = files.sort().map((file) => readFile(file, 'utf8'));
+      const slashAdjustedFiles = isWindows ? files.map.replace('\\', '/') : files;
+      const fileContentArray = slashAdjustedFiles.sort().map((file) => readFile(file, 'utf8'));
       const filesCount = fileContentArray.length;
 
       return Promise.all(fileContentArray).then((data) => {
