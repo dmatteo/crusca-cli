@@ -102,7 +102,7 @@ export default (argv) => {
 
     const ignoreArguments = ignoreArr.length > 0 ? ignoreArr.concat(whitelistFunc) : [whitelistFunc];
     return recursive(filePath, ignoreArguments).then((files) => {
-      const slashAdjustedFiles = isWindows ? files.map.replace('\\', '/') : files;
+      const slashAdjustedFiles = isWindows ? files.map(f => f.replace('\\', '/')) : files;
       const fileContentArray = slashAdjustedFiles.sort().map((file) => readFile(file, 'utf8'));
       const filesCount = fileContentArray.length;
 

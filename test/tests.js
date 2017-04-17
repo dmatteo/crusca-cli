@@ -299,5 +299,42 @@ describe('crusca-cli', () => {
 
   });
 
+  describe('running on Windows (mocked)', () => {
+
+    let originalPlatform =  Object.getOwnPropertyDescriptor(process, 'platform');
+    let opts = {};
+
+    before(() => {
+      Object.defineProperty(process, 'platform', {
+        value: 'win32'
+      });
+    });
+
+    beforeEach(() => {
+      opts = {
+        in: 'test/folder-test',
+        _: [],
+        help: false,
+        out: 'strings.pot',
+        e: undefined,
+        g: undefined,
+        q: true
+      };
+    });
+
+    it('with default parameters', () => {
+      return cli(opts).then((data) => {
+        return expect(data, 'to equal', {
+          files: 2,
+          strings: 6
+        });
+      });
+    });
+
+    after(() => {
+      Object.defineProperty(process, 'platform', originalPlatform);
+    });
+
+  })
 
 });
